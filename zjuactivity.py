@@ -1,5 +1,6 @@
 from zjuauthme import ZJUAUTHME
 import json
+import pickle
 
 class ZJUActivity(ZJUAUTHME):
     DOMAIN = "http://one.zju.edu.cn"
@@ -77,4 +78,22 @@ class ZJUActivity(ZJUAUTHME):
             whole_data.extend(self._query(ziyuan_id, csrf_token))
         return whole_data
 
-
+class Filter_ZJUActivity(ZJUActivity):
+    """
+    重载父类的run方法，但过滤一些不是活动的场地占用 按blacklist匹配
+    返回[校区,楼宇,资源,资源id,开始时间,结束时间,资源使用情况(活动名称)]的数组
+    """
+    BLACKLIST = [("__eq__", ""), ("startswith", "暂不"), ("startswith", "上课"), ("count", "组会"), ("count", "例会"), ("count", "党"), ("count","培训班"), ("count", "研修班")]
+    
+    def run(self):
+        data = super(Filter_ZJUActivity, self).run()
+        # pickle.dump(data, open("zjuactivity.status","wb"))
+        # data = pickle.load(open("zjuactivity.status","rb"))
+        newdata = []
+        for item in data:
+            for method,param in self.BLACKLIST:
+                if getattr(item[6],method)(param):
+                    break
+            else:
+                newdata.append(item)
+        return newdata
