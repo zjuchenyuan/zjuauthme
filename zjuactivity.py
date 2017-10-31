@@ -83,15 +83,19 @@ class Filter_ZJUActivity(ZJUActivity):
     重载父类的run方法，但过滤一些不是活动的场地占用 按blacklist匹配
     返回[校区,楼宇,资源,资源id,开始时间,结束时间,资源使用情况(活动名称)]的数组
     """
-    BLACKLIST = [("__eq__", ""), ("startswith", "暂不"), ("startswith", "上课"), ("count", "组会"), ("count", "例会"), ("count", "党"), ("count","培训班"), ("count", "研修班")]
+    BLACKLIST = [("__eq__", ""), ("startswith", "暂不"), ("startswith", "上课"), ("count", "组会"), ("count", "例会"), ("count", "党"), ("count", "领导"), ("count", "教改"), ("count","培训班"), ("count", "研修班")]
+    WHITELIST = ["学术"]
     
     @staticmethod
     def filter(data):
         newdata = []
         for item in data:
-            for method,param in Filter_ZJUActivity.BLACKLIST:
-                if getattr(item[6],method)(param):
-                    break
+            if not item[6] in Filter_ZJUActivity.WHITELIST:
+                for method,param in Filter_ZJUActivity.BLACKLIST:
+                    if getattr(item[6],method)(param):
+                        break
+                else:
+                    newdata.append(item)
             else:
                 newdata.append(item)
         return newdata
