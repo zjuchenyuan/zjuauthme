@@ -85,15 +85,17 @@ class Filter_ZJUActivity(ZJUActivity):
     """
     BLACKLIST = [("__eq__", ""), ("startswith", "暂不"), ("startswith", "上课"), ("count", "组会"), ("count", "例会"), ("count", "党"), ("count","培训班"), ("count", "研修班")]
     
-    def run(self):
-        data = super(Filter_ZJUActivity, self).run()
-        # pickle.dump(data, open("zjuactivity.status","wb"))
-        # data = pickle.load(open("zjuactivity.status","rb"))
+    @staticmethod
+    def filter(data):
         newdata = []
         for item in data:
-            for method,param in self.BLACKLIST:
+            for method,param in Filter_ZJUActivity.BLACKLIST:
                 if getattr(item[6],method)(param):
                     break
             else:
                 newdata.append(item)
         return newdata
+    
+    def run(self):
+        data = super(Filter_ZJUActivity, self).run()
+        return self.filter(data)
