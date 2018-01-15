@@ -27,6 +27,7 @@ Login ZJU Unified Identity Authentication system using Python3
 ```
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
+apt install -y tzdata # timezone file
 ln -sf /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
 echo "nameserver 10.10.0.21"> /etc/resolv.conf
 
