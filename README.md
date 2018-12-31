@@ -1,9 +1,15 @@
 # zjuauthme & zjuactivity
 Login ZJU Unified Identity Authentication system using Python3
 
+## 登录统一通行证
+
+研究了一下`rsa.js`的实现，现在已经不需要`execjs`库和js运行环境
+
+页面中的RSA加密本质上是把密码当成一个大端序的int，做mod N的0x10001的pow操作
+
 ## ZJU Activity
 
-* 登录统一通行证 [Code](zjuauthme.py) 依赖：[execjs](https://pypi.python.org/pypi/PyExecJS) [EasyLogin](https://github.com/zjuchenyuan/EasyLogin)
+* 登录统一通行证 [Code](zjuauthme.py) 依赖：[EasyLogin](https://github.com/zjuchenyuan/EasyLogin)
 * 爬取[http://one.zju.edu.cn](http://one.zju.edu.cn)的场地资源申请数据 并按照黑白名单过滤 [Code](zjuactivity.py)
 * 生成表格HTML [Code](zjuactivity_generate_pic.py)
 * 使用wkhtmltoimage生成png图片 [Code](zjuactivity_generate_pic.py) 依赖：[imgkit](https://github.com/jarrekk/imgkit)，[wkhtmltoimage](https://wkhtmltopdf.org)
@@ -20,7 +26,7 @@ Login ZJU Unified Identity Authentication system using Python3
 以下命令基于Ubuntu 16.04容器，执行的操作有：
 * 修复容器的locale和时区设置，以免容器默认POSIX无法输出中文
 * 安装微软雅黑字体，请从windows机器中自行复制
-* apt-get、pip安装上述提到的所有依赖，其中nodejs是为了python执行js而安装的
+* apt-get、pip安装上述提到的所有依赖
 * 配置secret.py
 * 执行咯~
 
@@ -35,9 +41,9 @@ echo "nameserver 10.10.0.21"> /etc/resolv.conf
 cp msyh.ttc /usr/share/fonts/
 
 apt update
-apt install -y git nodejs libfontconfig1 libxrender1 curl python3-pip
+apt install -y git libfontconfig1 libxrender1 curl python3-pip
 
-pip3 install requests bs4 pyexecjs imgkit upyun -i https://pypi.doubanio.com/simple/ --trusted-host pypi.doubanio.com
+pip3 install requests bs4 imgkit upyun -i https://pypi.doubanio.com/simple/ --trusted-host pypi.doubanio.com
 
 pushd /tmp
 curl -L -o wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz

@@ -1,11 +1,16 @@
-import execjs
 from EasyLogin import EasyLogin
 from pprint import pprint, pformat
 import json
-jssrc = open("security.js","r").read()
-jscontext = execjs.compile(jssrc)
 
 __all__ = ["ZJUAUTHME"]
+
+def rsa_encrypt(password_str, e_str, M_str):
+    password_bytes = bytes(password_str, 'ascii') # I guess no other characters in password
+    password_int = int.from_bytes(password_bytes,'big') # big endian bytes->int
+    e_int = int(e_str, 16) # equal to 0x10001
+    M_int = int(M_str, 16) # Modulus number
+    result_int = pow(password_int, e_int, M_int) # pow is a built-in function in python
+    return hex(result_int)[2:] # int->hex str
 
 class ZJUAUTHME():
     AUTHME_DOMAIN = "https://zjuam.zju.edu.cn"
@@ -23,7 +28,7 @@ class ZJUAUTHME():
         global jscontext
         self.a.get(self.AUTHME_DOMAIN+"/cas/login")
         execution = self.a.b.find("input",{"name":"execution"})["value"]
-        encryptedPwd = jscontext.call("main", self.password, *self._getPubKey())
+        encryptedPwd = rsa_encrypt(self.password, *self._getPubKey())
         x=self.a.post_dict(self.AUTHME_DOMAIN+"/cas/login",{"username":self.xh, "password":encryptedPwd, "authcode":"", "execution":execution, "_eventId":"submit" })
         if "iPlanetDirectoryPro" in x.headers.get("set-cookie",""):
             self.status = "Login OK"
