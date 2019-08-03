@@ -24,9 +24,13 @@ class ZJUAUTHME():
         data = self.a.get(self.AUTHME_DOMAIN+"/cas/v2/getPubKey", o=True).json()
         return data["exponent"], data["modulus"]
 
-    def login(self):
+    def login(self, retry=1):
         global jscontext
-        self.a.get(self.AUTHME_DOMAIN+"/cas/login")
+        x = self.a.get(self.AUTHME_DOMAIN+"/cas/login", o=True)
+        if x.status_code == 302:
+            # already logined
+            self.status = "Login OK (skipped)"
+            return True
         execution = self.a.b.find("input",{"name":"execution"})["value"]
         encryptedPwd = rsa_encrypt(self.password, *self._getPubKey())
         x=self.a.post_dict(self.AUTHME_DOMAIN+"/cas/login",{"username":self.xh, "password":encryptedPwd, "authcode":"", "execution":execution, "_eventId":"submit" })
@@ -34,8 +38,9 @@ class ZJUAUTHME():
             self.status = "Login OK"
             return True
         else:
-            self.status = "Login Failed"
-            return False
-        
-    
+            if not retry:
+                self.status = "Login Failed"
+                return False
+            else:
+                return self.login(retry=retry-1)
 
